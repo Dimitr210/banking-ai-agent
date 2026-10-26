@@ -1,0 +1,3 @@
+Account #101 | Owner: Anna | Balance: 445.00€
+Account #102 | Owner: Bob | Balance: 650.00€
+Account #103 | Owner: ILONA | Balance: 698.00€

@@ -1,0 +1,11 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Sensitive Data & Local Databases
+.env
+sessions_db.json
+
+# Virtual Environment
+venv/
+.venv/

@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python National Bank — Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #1a365d; border-bottom: 2px solid #3182ce; padding-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #2b6cb0; }
+        .account-item { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 10px; margin-bottom: 10px; border-radius: 4px; }
+        input, button { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #cbd5e0; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #3182ce; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background-color: #2b6cb0; }
+        .chat-box { height: 180px; border: 1px solid #e2e8f0; border-radius: 4px; padding: 10px; overflow-y: auto; background: #fafafa; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏦 Python National Bank — Live Web Dashboard</h1>
+
+    <div class="grid">
+        <!-- 1. ΠΡΟΒΟΛΗ ΛΟΓΑΡΙΑΣΜΩΝ -->
+        <div class="card">
+            <h3>📋 Λογαριασμοί Τράπεζας (Live)</h3>
+            <div id="accounts-list">Φόρτωση δεδομένων...</div>
+            <button onclick="loadAccounts()" style="margin-top: 15px;">🔄 Ανανέωση</button>
+        </div>
+
+        <!-- 2. ΦΟΡΜΑ ΣΥΝΑΛΛΑΓΩΝ -->
+        <div class="card">
+            <h3>💸 Νέα Συναλλαγή</h3>
+            <label>Αριθμός Λογαριασμού:</label>
+            <input type="text" id="acc-num" placeholder="π.χ. 101">
+            
+            <label>Ποσό (€):</label>
+            <input type="number" id="amount" placeholder="π.χ. 50">
+
+            <div style="display: flex; gap: 10px;">
+                <button onclick="makeTransaction('deposit')" style="background-color: #38a169;">Κατάθεση</button>
+                <button onclick="makeTransaction('withdraw')" style="background-color: #e53e3e;">Ανάληψη</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. AI CHAT MODULE -->
+    <div class="card" style="margin-top: 20px;">
+        <h3>🤖 Live AI Assistant</h3>
+        <div class="chat-box" id="chat-history">
+            <p><em>🤖 System: Συνδέθηκε επιτυχώς με το FastAPI server! Ρωτήστε οτιδήποτε.</em></p>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="text" id="ai-query" placeholder="Ρωτήστε το AI (π.χ. 'Ποιος είναι ο πλουσιότερος πελάτης;')...">
+            <button onclick="sendAiQuery()" style="width: 150px;">Αποστολή</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000";
+    
+    // 🧠 Δημιουργία μοναδικού Session ID για τη διατήρηση μνήμης συνομιλίας
+    const sessionId = "session_" + Math.floor(Math.random() * 1000000);
+    console.log("🟢 Active Session ID:", sessionId);
+    // 1. Φόρτωση Λογαριασμών από το FastAPI
+    async function loadAccounts() {
+        try {
+            const res = await fetch(`${API_URL}/accounts`);
+            const data = await res.json();
+            
+            const listDiv = document.getElementById('accounts-list');
+            listDiv.innerHTML = '';
+
+            data.forEach(acc => {
+                listDiv.innerHTML += `
+                    <div class="account-item">
+                        <strong>#${acc.account_number} - ${acc.owner_name}</strong><br>
+                        Υπόλοιπο: <strong>${acc.balance.toFixed(2)}€</strong>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            document.getElementById('accounts-list').innerHTML = '<span style="color:red;">❌ Αποτυχία σύνδεσης με το FastAPI server!</span>';
+        }
+    }
+
+    // 2. Εκτέλεση Συναλλαγής μέσω API
+    async function makeTransaction(type) {
+        const acc_num = document.getElementById('acc-num').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+
+        if (!acc_num || !amount) {
+            alert("Παρακαλώ συμπληρώστε όλα τα πεδία!");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/${type}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account_number: acc_num, amount: amount })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                alert(data.message);
+                loadAccounts(); // Αυτόματη ανανέωση της οθόνης!
+            } else {
+                alert(`❌ Σφάλμα: ${data.detail}`);
+            }
+        } catch (e) {
+            alert("❌ Αποτυχία επικοινωνίας με το API server.");
+        }
+    }
+
+    
+    // 3. Αποστολή Ερώτησης στο AI via FastAPI (με Μνήμη & Analytics)
+    async function sendAiQuery() {
+        const queryInput = document.getElementById('ai-query');
+        const chatHistory = document.getElementById('chat-history');
+        const query = queryInput.value;
+
+        if (!query) return;
+
+        chatHistory.innerHTML += `<p><strong>Εσείς:</strong> ${query}</p>`;
+        queryInput.value = '';
+
+        try {
+            const res = await fetch(`${API_URL}/ai-ask`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    question: query,
+                    session_id: sessionId  // <-- Στέλνουμε το ID για τη Μνήμη
+                })
+            });
+            const data = await res.json();
+            
+            // Διαμόρφωση κειμένου Analytics (αν επιστραφούν metrics)
+            let metricsText = "";
+            if (data.metrics) {
+                metricsText = `<br><small style="color: #718096; font-size: 0.8em;">
+                    ⏱️ Latency: ${data.metrics.latency_sec}s | 🪙 Tokens: ${data.metrics.total_tokens}
+                </small>`;
+            }
+
+            chatHistory.innerHTML += `<p><strong>🤖 AI:</strong> ${data.answer} ${metricsText}</p>`;
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        } catch (e) {
+            chatHistory.innerHTML += `<p style="color:red;">❌ Σφάλμα κατά την επικοινωνία με το AI.</p>`;
+        }
+    }
+    // Αρχική φόρτωση
+    loadAccounts();
+</script>
+
+</body>
+</html>
