@@ -18,10 +18,13 @@ from google.genai import types
 # =====================================================================
 # 🔑 GEMINI API KEY CONFIGURATION (ΝΕΟ SDK google-genai)
 # =====================================================================
-GEMINI_API_KEY = "AQ.Ab8RN6K0igY-8yJJbEPxOeZcJXdfr4k6g_6vGqd9m-VXyIn7jg"  # <--- Βάλε το νέο σου API Key!
+import os
+from google import genai
 
+# Ασφαλής ανάγνωση API Key από Environment Variable
+api_key = os.getenv("GEMINI_API_KEY", "YOUR_GEMINI_API_KEY_HERE")
 try:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+    client = genai.Client(api_key=api_key)
     print("✅ Ο νέος Gemini Client (google-genai) αρχικοποιήθηκε επιτυχώς!")
 except Exception as e:
     print(f"❌ Σφάλμα Αρχικοποίησης Client: {e}")
