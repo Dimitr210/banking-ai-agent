@@ -185,6 +185,9 @@ class AIQueryRequest(BaseModel):
 ## =====================================================================
 # 🏦 ENDPOINT: ΠΡΟΒΟΛΗ ΠΡΑΓΜΑΤΙΚΩΝ ΛΟΓΑΡΙΑΣΜΩΝ ΤΡΑΠΕΖΑΣ
 # =====================================================================
+@app.get("/")
+def read_root():
+    return {"status": "online", "message": "Banking AI Agent API is running!"}
 @app.get("/accounts")
 def get_accounts():
     # Επιστρέφει τους πραγματικούς λογαριασμούς από το bank.accounts
