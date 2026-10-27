@@ -182,8 +182,12 @@ class AIQueryRequest(BaseModel):
     question: str
     session_id: str = "default_session"
 
+## =====================================================================
+# 🏦 ENDPOINT: ΠΡΟΒΟΛΗ ΠΡΑΓΜΑΤΙΚΩΝ ΛΟΓΑΡΙΑΣΜΩΝ ΤΡΑΠΕΖΑΣ
+# =====================================================================
 @app.get("/accounts")
 def get_accounts():
+    # Επιστρέφει τους πραγματικούς λογαριασμούς από το bank.accounts
     return [acc.to_dict() for acc in bank.accounts.values()]
 
 @app.post("/deposit")
